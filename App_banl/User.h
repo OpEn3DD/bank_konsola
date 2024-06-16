@@ -1,22 +1,22 @@
 #pragma once
 #include "DbManager.h"
-class Account
+class User
 {
 private:
     DbManager& dbManager;
     sqlite3_stmt* stmt;
 
 public:
-    Account(DbManager& dbManager);
-    void techniczna(int& accountId);
-    void createAccount();
-    bool login(int& accountId);
-    void showBalance(int accountId);
+    User(DbManager& dbManager);
+    void techniczna(int& UserId);
+    void createUser();
+    bool login(int& UserId);
+    void showBalance(int UserId);
     bool isPasswordRight(string password);
     bool isPeselRight(string pesel);
-    bool deleteAccount();
-    void wplacSrodki(int accountId, float ammount);
-    void wyplacSrodki(int accountId, float ammount);
+    bool deleteUser();
+    void wplacSrodki(int Id, float ammount);
+    void wyplacSrodki(int UserId, float ammount);
 
 };
 

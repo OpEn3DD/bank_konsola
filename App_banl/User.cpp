@@ -1,10 +1,10 @@
-﻿#include "Account.h"
+﻿#include "User.h"
 #include <windows.h>
 #include <random>
 
-Account::Account(DbManager& dbManager) : dbManager(dbManager) {
+User::User(DbManager& dbManager) : dbManager(dbManager) {
     const char* sql =
-        "CREATE TABLE IF NOT EXISTS accounts ("
+        "CREATE TABLE IF NOT EXISTS Users ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT, "
         "username TEXT NOT NULL, "
         "password TEXT NOT NULL, "
@@ -14,10 +14,10 @@ Account::Account(DbManager& dbManager) : dbManager(dbManager) {
     dbManager.executeSQL(sql);
 }
 
-void Account::techniczna(int& accountId) {
-    const char* sql = "SELECT * FROM accounts WHERE id = ?;";
+void User::techniczna(int& userId) {
+    const char* sql = "SELECT * FROM Users WHERE id = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    sqlite3_bind_int(stmt, 1, accountId);
+    sqlite3_bind_int(stmt, 1, userId);
 
     int rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
@@ -61,7 +61,7 @@ void User::createUser() {
         accNumber += std::to_string(distr(eng));
 
 
-    const char* sql = "INSERT INTO accounts (username, password, pesel, accNumber) VALUES (?, ?, ?, ?);";
+    const char* sql = "INSERT INTO Users (username, password, pesel, accNumber) VALUES (?, ?, ?, ?);";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
@@ -74,7 +74,7 @@ void User::createUser() {
     sqlite3_finalize(stmt);
 }
 
-bool Account::login(int& accountId) {
+bool User::login(int& userId) {
     string username, password;
     cout << "Wpisz nazwe uzytkownika: ";
     cin >> username;
@@ -86,14 +86,14 @@ bool Account::login(int& accountId) {
     cin >> password;
     SetConsoleMode(hStdin, mode);
 
-    const char* sql = "SELECT id FROM accounts WHERE username = ? AND password = ?;";
+    const char* sql = "SELECT id FROM Users WHERE username = ? AND password = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
 
     int rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
-        accountId = sqlite3_column_int(stmt, 0);
+        userId = sqlite3_column_int(stmt, 0);
         system("cls");
         cout << "Zalogowano" << endl;
         sqlite3_finalize(stmt);
@@ -106,10 +106,10 @@ bool Account::login(int& accountId) {
     }
 }
 
-void Account::showBalance(int accountId) {
-    const char* sql = "SELECT balance FROM accounts WHERE id = ?;";
+void User::showBalance(int userId) {
+    const char* sql = "SELECT balance FROM Users WHERE id = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    sqlite3_bind_int(stmt, 1, accountId);
+    sqlite3_bind_int(stmt, 1, userId);
 
     int rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
@@ -123,7 +123,7 @@ void Account::showBalance(int accountId) {
     sqlite3_finalize(stmt);
 }
 
-bool Account::isPasswordRight(string password) {
+bool User::isPasswordRight(string password) {
     bool hasUpperCase = false;
     bool hasDigit = false;
     bool hasSpecialChar = false;
@@ -148,7 +148,7 @@ bool Account::isPasswordRight(string password) {
     return false;
 }
 
-bool Account::isPeselRight(string pesel) {
+bool User::isPeselRight(string pesel) {
     // Sprawdzenie długości PESEL
     if (pesel.length() != 11) {
         return false;
@@ -174,12 +174,12 @@ bool Account::isPeselRight(string pesel) {
 
 }
 
-bool Account::deleteAccount() {
+bool User::deleteUser() {
     return true;
 }
 
-void Account::wplacSrodki(int accountId, float ammount) {
-    const char* sql = "UPDATE accounts SET balance = balance + ? WHERE id = ?;";
+void User::wplacSrodki(int userId, float ammount) {
+    const char* sql = "UPDATE Users SET balance = balance + ? WHERE id = ?;";
     sqlite3_stmt* stmt;
     int rc;
 
@@ -192,7 +192,7 @@ void Account::wplacSrodki(int accountId, float ammount) {
 
     // Bindowanie parametrów
     sqlite3_bind_int(stmt, 1, ammount);
-    sqlite3_bind_int(stmt, 2, accountId);
+    sqlite3_bind_int(stmt, 2, userId);
 
     // Wykonanie zapytania
     rc = sqlite3_step(stmt);
@@ -207,8 +207,8 @@ void Account::wplacSrodki(int accountId, float ammount) {
     sqlite3_finalize(stmt);
 }
 
-void Account::wyplacSrodki(int accountId, float amount) {
-    const char* sql = "UPDATE accounts SET balance = balance - ? WHERE id = ? AND balance >= ?;";
+void User::wyplacSrodki(int userId, float amount) {
+    const char* sql = "UPDATE Users SET balance = balance - ? WHERE id = ? AND balance >= ?;";
     sqlite3_stmt* stmt;
     int rc;
 
@@ -221,7 +221,7 @@ void Account::wyplacSrodki(int accountId, float amount) {
 
     // Bindowanie parametrów
     sqlite3_bind_int(stmt, 1, amount);
-    sqlite3_bind_int(stmt, 2, accountId);
+    sqlite3_bind_int(stmt, 2, userId);
     sqlite3_bind_int(stmt, 3, amount);
 
     // Wykonanie zapytania

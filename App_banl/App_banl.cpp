@@ -4,22 +4,22 @@
 #include <windows.h>
 #include <string>
 #include "DbManager.h"
-#include "Account.h"
+#include "User.h"
 using namespace std;
 
 class BankApp {
 public:
 private:
     DbManager dbManager;
-    Account account;
-    int loggedInAccountId;
+    User user;
+    int loggedInUserId;
     bool loggedIn;
 public:
     BankApp(const string& dbName) :
         dbManager(dbName),
-        account(dbManager),
+        user(dbManager),
 
-        loggedInAccountId(-1) {}
+        loggedInUserId(-1) {}
 
     void run() {
         int choice{};
@@ -38,15 +38,15 @@ public:
             switch (choice) {
             case 1:
                 system("cls");
-                account.createAccount();
+                user.createUser();
                 break;
             case 2:
                 system("cls");
-                loggedIn = account.login(loggedInAccountId);
+                loggedIn = user.login(loggedInUserId);
                 break;
             case 3:
                 system("cls");
-                if (loggedIn) account.showBalance(loggedInAccountId);
+                if (loggedIn) user.showBalance(loggedInUserId);
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
             case 4:
@@ -54,7 +54,7 @@ public:
                 if (loggedIn) {
                     cout << "Podaj wpłacaną kwote: ";
                     cin >> ammount;
-                    account.wplacSrodki(loggedInAccountId, ammount);
+                    user.wplacSrodki(loggedInUserId, ammount);
                 }
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
@@ -63,14 +63,14 @@ public:
                 if (loggedIn) {
                     cout << "Podaj wypłacaną kwote: ";
                     cin >> ammount;
-                    account.wyplacSrodki(loggedInAccountId, ammount);
+                    user.wyplacSrodki(loggedInUserId, ammount);
                 }
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
             case 7:
                 return;
             case 99:
-                account.techniczna(loggedInAccountId);
+                user.techniczna(loggedInUserId);
                 break;
 
             default:

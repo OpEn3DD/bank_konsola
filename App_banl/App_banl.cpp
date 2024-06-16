@@ -59,7 +59,7 @@ public:
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
             case 5:
-                system("cls");
+                system("cls");//UUUłozył byś sobie zycie
                 if (loggedIn) {
                     cout << "Podaj wypłacaną kwote: ";
                     cin >> ammount;

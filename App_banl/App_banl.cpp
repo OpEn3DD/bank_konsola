@@ -5,6 +5,7 @@
 #include <string>
 #include "DbManager.h"
 #include "User.h"
+#include "Accounts.h"
 using namespace std;
 
 class BankApp {
@@ -12,14 +13,18 @@ public:
 private:
     DbManager dbManager;
     User user;
+    Accounts accounts;
     int loggedInUserId;
+    int loggedInAccountId;
     bool loggedIn;
 public:
     BankApp(const string& dbName) :
         dbManager(dbName),
         user(dbManager),
+        accounts(dbManager),
+        loggedInUserId(-1),
+        loggedInAccountId(-1) {};
 
-        loggedInUserId(-1) {}
 
     void run() {
         int choice{};
@@ -27,10 +32,10 @@ public:
 
         while (true) {
             if(!loggedIn)
-                cout << "1. Załóż konto\n2. Zaloguj\n7. Exit\nWybierz opcje: ";
+                cout << "1. Załóż konto użytkownika\n2. Zaloguj\n7. Exit\nWybierz opcje: ";
             else {
 
-                cout << "3.Pokaż bilans konta\n4.Wpłać środki\n5.Wyplac srodki\n7.Exit\nChoose an option : ";
+                cout << "3.Załóż nowe konto bankowe \n4.Pokaż bilans konta\n5.Wpłać środki\n6.Wyplac srodki\n7.Exit\nChoose an option : ";
             }
 
             cin >> choice;
@@ -38,7 +43,8 @@ public:
             switch (choice) {
             case 1:
                 system("cls");
-                user.createUser();
+                if (!loggedIn) user.createUser();
+                else cout << "Nie mozesz utworzyć konta uzytkownika będąc zalogowanym" << endl;
                 break;
             case 2:
                 system("cls");
@@ -46,24 +52,29 @@ public:
                 break;
             case 3:
                 system("cls");
-                if (loggedIn) user.showBalance(loggedInUserId);
+                if (loggedIn) accounts.createAccount(loggedInUserId,"PLN", loggedInAccountId);
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
             case 4:
                 system("cls");
-                if (loggedIn) {
-                    cout << "Podaj wpłacaną kwote: ";
-                    cin >> ammount;
-                    user.wplacSrodki(loggedInUserId, ammount);
-                }
+                if (loggedIn) accounts.showBalance(loggedInAccountId);
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
             case 5:
-                system("cls");//UUUłozył byś sobie zycie
+                system("cls");
+                if (loggedIn) {
+                    cout << "Podaj wpłacaną kwote: ";
+                    cin >> ammount;
+                    accounts.depositMoney(loggedInAccountId, ammount);
+                }
+                else cout << "Najpierw musisz się zalogowac" << endl;
+                break;
+            case 6:
+                system("cls");
                 if (loggedIn) {
                     cout << "Podaj wypłacaną kwote: ";
                     cin >> ammount;
-                    user.wyplacSrodki(loggedInUserId, ammount);
+                    accounts.withdrawMoney(loggedInAccountId, ammount);
                 }
                 else cout << "Najpierw musisz się zalogowac" << endl;
                 break;
@@ -77,7 +88,7 @@ public:
                 system("cls");
                 cout << "Invalid option. Please try again." << endl;
                 std::cin.clear(); // Resetuje flagi błędów
-                std::cin.ignore(12343234, '\n');
+                std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
                 break;
             }
         }

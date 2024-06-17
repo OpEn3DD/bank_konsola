@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <random>
 #include <regex>
+#include <conio.h>
 
 User::User(DbManager& dbManager) : dbManager(dbManager) {
     const char* sql =
@@ -19,15 +20,6 @@ User::User(DbManager& dbManager) : dbManager(dbManager) {
         "currencyName TEXT NOT NULL);";
     dbManager.executeSQL(sql2);
 
-    const char* sql3 =
-        "CREATE TABLE IF NOT EXISTS Accounts ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "userId INT NOT NULL, "
-        "balance REAL DEFAULT 0.0, "
-        "currencyId TEXT NOT NULL, "
-        "FOREIGN KEY(userId) REFERENCES Users(id), "
-        "FOREIGN KEY(currencyId) REFERENCES Currency(id));";
-    dbManager.executeSQL(sql3);
 
 
 }
@@ -57,14 +49,22 @@ void User::createUser() {
     string username, password, pesel, accNumber, email;
     cout << "Wpisz nazwe uzytkownika: ";
     cin >> username;
+    char ch;
     do {
         cout << "Wpisz hasło:";
-        HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-        DWORD mode = 0;
-        GetConsoleMode(hStdin, &mode);
-        SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
-        cin >> password;
-        SetConsoleMode(hStdin, mode);
+        while ((ch = _getch()) != 13) { // 13 to ASCII dla Enter
+            if (ch == 8) { // 8 jest ASCII dla Backspace
+                if (!password.empty()) {
+                    cout << "\b \b"; // Usuwanie ostatniego znaku
+                    password.pop_back();
+                }
+            }
+            else {
+                password.push_back(ch);
+                cout << '*';
+            }
+        }
+        cout << password;
     } while (!isPasswordRight(password));
 
     do {
@@ -77,37 +77,42 @@ void User::createUser() {
         cin >> email;
     } while (!isEmailRight(email));
 
-    random_device rd;
-    mt19937 eng(rd()); 
-    uniform_int_distribution<> distr(0, 9); 
-    for (int i = 0; i < 11; ++i)
-        accNumber += std::to_string(distr(eng));
 
 
-    const char* sql = "INSERT INTO Users (username, password, pesel, accNumber) VALUES (?, ?, ?, ?);";
+
+    const char* sql = "INSERT INTO Users (username, password, pesel, email) VALUES (?, ?, ?, ?);";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, pesel.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, accNumber.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, email.c_str(), -1, SQLITE_STATIC);
 
     sqlite3_step(stmt);
     system("cls");
     cout << "Stworzono konto użytkownika" << endl;
     sqlite3_finalize(stmt);
+
 }
 
 bool User::login(int& userId) {
     string username, password;
+    char ch;
     cout << "Wpisz nazwe uzytkownika: ";
     cin >> username;
     cout << "Wpisz hasło: ";
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD mode = 0;
-    GetConsoleMode(hStdin, &mode);
-    SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
-    cin >> password;
-    SetConsoleMode(hStdin, mode);
+    while ((ch = _getch()) != 13) { // 13 is ASCII for Enter key
+        if (ch == 8) { // 8 is ASCII for Backspace key
+            if (!password.empty()) {
+                cout << "\b \b"; // Erase the last character
+                password.pop_back();
+            }
+        }
+        else {
+            password.push_back(ch);
+            cout << '*';
+        }
+    }
+    cout << password;
 
     const char* sql = "SELECT id FROM Users WHERE username = ? AND password = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
@@ -115,6 +120,7 @@ bool User::login(int& userId) {
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
 
     int rc = sqlite3_step(stmt);
+
     if (rc == SQLITE_ROW) {
         userId = sqlite3_column_int(stmt, 0);
         system("cls");
@@ -127,23 +133,6 @@ bool User::login(int& userId) {
         sqlite3_finalize(stmt);
         return false;
     }
-}
-
-void User::showBalance(int userId) {
-    const char* sql = "SELECT balance FROM Accounts WHERE userId = ?;";
-    sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    sqlite3_bind_int(stmt, 1, userId);
-
-    int rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        double balance = sqlite3_column_double(stmt, 0);
-        cout << "Bilans twojego konta: " << balance << endl;
-    }
-    else {
-        cerr << "Nie uda³o sie pobraæ bilansu twojego konta" << endl;
-    }
-
-    sqlite3_finalize(stmt);
 }
 
 bool User::isPasswordRight(string password) {
@@ -210,69 +199,4 @@ bool User::deleteUser() {
     return true;
 }
 
-void User::wplacSrodki(int userId, float ammount) {
-    const char* sql = "UPDATE Users SET balance = balance + ? WHERE id = ?;";
-    sqlite3_stmt* stmt;
-    int rc;
 
-    // Przygotowanie zapytania
-    rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        cerr << "Nie udało się przygotować zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
-        return;
-    }
-
-    // Bindowanie parametrów
-    sqlite3_bind_int(stmt, 1, ammount);
-    sqlite3_bind_int(stmt, 2, userId);
-
-    // Wykonanie zapytania
-    rc = sqlite3_step(stmt);
-    if (rc == SQLITE_DONE) {
-        system("cls");
-        cout << "Wpłacono środki. Kwota: " << ammount << " złotych." << endl;
-    } else {
-        cerr << "Wpłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << endl;
-    }
-
-    // Zwolnienie zasobów
-    sqlite3_finalize(stmt);
-}
-
-void User::wyplacSrodki(int userId, float amount) {
-    const char* sql = "UPDATE Users SET balance = balance - ? WHERE id = ? AND balance >= ?;";
-    sqlite3_stmt* stmt;
-    int rc;
-
-    // Przygotowanie zapytania
-    rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        cerr << "Nie udało się przygotować zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
-        return;
-    }
-
-    // Bindowanie parametrów
-    sqlite3_bind_int(stmt, 1, amount);
-    sqlite3_bind_int(stmt, 2, userId);
-    sqlite3_bind_int(stmt, 3, amount);
-
-    // Wykonanie zapytania
-    rc = sqlite3_step(stmt);
-    if (rc == SQLITE_DONE) {
-        if (sqlite3_changes(dbManager.getDB()) > 0) {
-            system("cls");
-            cout << "Wypłacono środki. Kwota: " << amount << " złotych." << endl;
-        }
-        else {
-            system("cls");
-            cerr << "Wypłata nie przebiegła pomyślnie! Upewnij się, że masz wystarczającą ilość środków." << endl;
-        }
-    }
-    else {
-        system("cls");
-        cerr << "Wypłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << endl;
-    }
-
-    // Zwolnienie zasobów
-    sqlite3_finalize(stmt);
-}

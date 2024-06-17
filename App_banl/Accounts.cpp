@@ -4,20 +4,8 @@
 #include <regex>
 #include <conio.h>
 
-Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {
-    const char* sql3 =
-        "CREATE TABLE IF NOT EXISTS Accounts ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "userId INT NOT NULL, "
-        "accountnumber TEXT NOT NULL, "
-        "balance REAL DEFAULT 0.0, "
-        "currencyId TEXT NOT NULL, "
-        "FOREIGN KEY(userId) REFERENCES Users(id), "
-        "FOREIGN KEY(currencyId) REFERENCES Currency(id));"
-        ;
-    dbManager.executeSQL(sql3);
+Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {}
 
-}
 void Accounts::showBalance(int userId) {
     const char* sql = "SELECT balance FROM Accounts WHERE userId = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
@@ -29,13 +17,14 @@ void Accounts::showBalance(int userId) {
         cout << "Bilans twojego konta: " << balance << endl;
     }
     else {
-        cerr << "Nie udało sie pobraæ bilansu twojego konta" << endl;
+        cerr << "Nie udało sie pobrac bilansu twojego konta" << endl;
     }
 
     sqlite3_finalize(stmt);
 }
+
 void Accounts::depositMoney(int userId, float ammount) {
-    const char* sql = "UPDATE Users SET balance = balance + ? WHERE id = ?;";
+    const char* sql = "UPDATE Accounts SET balance = balance + ? WHERE id = ?;";
     sqlite3_stmt* stmt;
     int rc;
 
@@ -63,8 +52,9 @@ void Accounts::depositMoney(int userId, float ammount) {
     // Zwolnienie zasobów
     sqlite3_finalize(stmt);
 }
+
 void Accounts::withdrawMoney(int userId, float amount) {
-    const char* sql = "UPDATE Users SET balance = balance - ? WHERE id = ? AND balance >= ?;";
+    const char* sql = "UPDATE Accounts SET balance = balance - ? WHERE id = ? AND balance >= ?;";
     sqlite3_stmt* stmt;
     int rc;
 
@@ -100,7 +90,8 @@ void Accounts::withdrawMoney(int userId, float amount) {
     // Zwolnienie zasobów
     sqlite3_finalize(stmt);
 }
-void Accounts::createAccount(int userId,string currencyId, int& AccountId) {
+
+void Accounts::createAccount(int userId, string currencyId, int& AccountId) {
     string accNumber;
     random_device rd;
     mt19937 eng(rd());
@@ -108,10 +99,9 @@ void Accounts::createAccount(int userId,string currencyId, int& AccountId) {
     for (int i = 0; i < 11; ++i)
         accNumber += std::to_string(distr(eng));
 
+    // Wykonanie polecenia PRAGMA table_info(Accounts);
+    const char* sql3 = "PRAGMA table_info(Accounts);";
 
-
-        // Wykonanie polecenia PRAGMA table_info(Accounts);
-        const char* sql3 = "PRAGMA table_info(Accounts);";
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql3, -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
         std::cerr << "Failed to execute statement: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
@@ -139,9 +129,6 @@ void Accounts::createAccount(int userId,string currencyId, int& AccountId) {
 
     // Zwalnianie zasobów
     sqlite3_finalize(stmt);
-    
-    
-    
     
     const char* sql = "INSERT INTO Accounts(userId,accountnumber,balance ,currencyId) VALUES (?,?,0.0, ?);";
      rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);

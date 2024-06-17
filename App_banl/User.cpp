@@ -20,7 +20,17 @@ User::User(DbManager& dbManager) : dbManager(dbManager) {
         "currencyName TEXT NOT NULL);";
     dbManager.executeSQL(sql2);
 
+    const char* sql3 =
+        "CREATE TABLE IF NOT EXISTS Accounts ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "userId INT NOT NULL, "
+        "accountnumber TEXT NOT NULL, "
+        "balance REAL DEFAULT 0.0, "
+        "currencyId TEXT NOT NULL, "
+        "FOREIGN KEY(userId) REFERENCES Users(id), "
+        "FOREIGN KEY(currencyId) REFERENCES Currency(id));";
 
+    dbManager.executeSQL(sql3);
 
 }
 
@@ -39,7 +49,7 @@ void User::techniczna(int& userId) {
         
     }
     else {
-        cerr << "Nie udało sie pobraæ bilansu twojego konta" << endl;
+        cerr << "Nie udało sie" << endl;
     }
 
     sqlite3_finalize(stmt);
@@ -50,6 +60,7 @@ void User::createUser() {
     cout << "Wpisz nazwe uzytkownika: ";
     cin >> username;
     char ch;
+
     do {
         cout << "Wpisz hasło:";
         while ((ch = _getch()) != 13) { // 13 to ASCII dla Enter
@@ -64,11 +75,11 @@ void User::createUser() {
                 cout << '*';
             }
         }
-        cout << password;
+        //cout << password;
     } while (!isPasswordRight(password));
 
     do {
-        cout << "Wpisz swoj numer pesel ";
+        cout << "\nWpisz swoj numer pesel ";
         cin >> pesel;
     } while (!isPeselRight(pesel));
 
@@ -78,14 +89,18 @@ void User::createUser() {
     } while (!isEmailRight(email));
 
 
-
-
     const char* sql = "INSERT INTO Users (username, password, pesel, email) VALUES (?, ?, ?, ?);";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, pesel.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, email.c_str(), -1, SQLITE_STATIC);
+    sqlite3_step(stmt);
+
+    const char* sql2 = "INSER INTO Accounts (userId, accountNumber, currencyId) VALUES (?, ?, 1);";
+    sqlite3_prepare_v2(dbManager.getDB(), sql2, -1, &stmt, 0);
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
 
     sqlite3_step(stmt);
     system("cls");

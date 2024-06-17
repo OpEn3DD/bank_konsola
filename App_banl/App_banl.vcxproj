@@ -129,12 +129,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Accounts.cpp" />
+    <ClCompile Include="Currency.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="App_banl.cpp" />
     <ClCompile Include="DbManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accounts.h" />
+    <ClInclude Include="Currency.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="DbManager.h" />
   </ItemGroup>

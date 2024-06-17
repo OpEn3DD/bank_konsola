@@ -1,6 +1,7 @@
 ﻿#include "User.h"
 #include <windows.h>
 #include <random>
+#include <regex>
 
 User::User(DbManager& dbManager) : dbManager(dbManager) {
     const char* sql =
@@ -9,9 +10,26 @@ User::User(DbManager& dbManager) : dbManager(dbManager) {
         "username TEXT NOT NULL, "
         "password TEXT NOT NULL, "
         "pesel TEXT NOT NULL, "
-        "accNumber TEXT,"
-        "balance REAL DEFAULT 0.0);";
+        "email TEXT NOT NULL);";
     dbManager.executeSQL(sql);
+
+    const char* sql2 =
+        "CREATE TABLE IF NOT EXISTS Currency ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "currencyName TEXT NOT NULL);";
+    dbManager.executeSQL(sql2);
+
+    const char* sql3 =
+        "CREATE TABLE IF NOT EXISTS Accounts ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "userId INT NOT NULL, "
+        "balance REAL DEFAULT 0.0, "
+        "currencyId TEXT NOT NULL, "
+        "FOREIGN KEY(userId) REFERENCES Users(id), "
+        "FOREIGN KEY(currencyId) REFERENCES Currency(id));";
+    dbManager.executeSQL(sql3);
+
+
 }
 
 void User::techniczna(int& userId) {
@@ -36,7 +54,7 @@ void User::techniczna(int& userId) {
 }
 
 void User::createUser() {
-    string username, password, pesel, accNumber;
+    string username, password, pesel, accNumber, email;
     cout << "Wpisz nazwe uzytkownika: ";
     cin >> username;
     do {
@@ -53,6 +71,11 @@ void User::createUser() {
         cout << "Wpisz swoj numer pesel ";
         cin >> pesel;
     } while (!isPeselRight(pesel));
+
+    do {
+        cout << "Wpisz swoj numer pesel ";
+        cin >> email;
+    } while (!isEmailRight(email));
 
     random_device rd;
     mt19937 eng(rd()); 
@@ -107,7 +130,7 @@ bool User::login(int& userId) {
 }
 
 void User::showBalance(int userId) {
-    const char* sql = "SELECT balance FROM Users WHERE id = ?;";
+    const char* sql = "SELECT balance FROM Accounts WHERE userId = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_int(stmt, 1, userId);
 
@@ -171,6 +194,15 @@ bool User::isPeselRight(string pesel) {
     // Sprawdzenie ostatniej cyfry jako sumy kontrolnej
     int checksum = (10 - (sum % 10)) % 10;
     return checksum == (pesel[10] - '0');
+
+}
+
+bool User::isEmailRight(string email) {
+    // Definiowanie wzorca dla poprawnego adresu email
+    const std::regex pattern(R"((\w+)(\.\w+)*@(\w+)(\.\w+)+)");
+
+    // Sprawdzanie, czy wprowadzony email pasuje do wzorca
+    return std::regex_match(email, pattern);
 
 }
 

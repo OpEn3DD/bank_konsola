@@ -14,6 +14,7 @@ public:
     void showBalance(int UserId);
     bool isPasswordRight(string password);
     bool isPeselRight(string pesel);
+    bool isEmailRight(string email);
     bool deleteUser();
     void wplacSrodki(int Id, float ammount);
     void wyplacSrodki(int UserId, float ammount);

@@ -1,5 +1,6 @@
 #include "DbManager.h"
 using namespace std;
+
 DbManager::DbManager(const string& dbName) {
     rc = sqlite3_open(dbName.c_str(), &db);
     if (rc) {

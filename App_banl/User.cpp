@@ -73,7 +73,7 @@ void User::createUser() {
     } while (!isPeselRight(pesel));
 
     do {
-        cout << "Wpisz swoj numer pesel ";
+        cout << "Wpisz swoj numer email ";
         cin >> email;
     } while (!isEmailRight(email));
 

@@ -64,7 +64,7 @@ public:
                 switch (choice) {
                 case 1:
                     system("cls");
-                    if (loggedIn) accounts.createAccount(loggedInUserId, "PLN", loggedInAccountId);
+                    if (loggedIn) accounts.createAccount(loggedInUserId, "PLN", loggedInUserId);
                     else cout << "Najpierw musisz się zalogowac" << endl;
                     break;
                 case 2:

@@ -10,9 +10,9 @@ BankApp::BankApp(const std::string& dbName) :
     loggedInAccountId(-1)
 {};
 
-int BankApp::selectAccount(int& userId) {
+int BankApp::selectAccount(int userId) {
     int accId{};
-    const char* sql = "SELECT id, accountnumber, currencyId FROM Accounts WHERE userId = ?;";
+    const char* sql = "SELECT Accounts.id, Accounts.accountnumber, Currency.currencyName FROM Accounts JOIN Currency ON Accounts.currencyId = Currency.id WHERE Accounts.userId = ? ; ";
     sqlite3_stmt* stmt;
 
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
@@ -42,7 +42,23 @@ int BankApp::selectAccount(int& userId) {
     cout << "\nPodaj ID konta na które chcesz siê zalogowaæ: ";
     cin >> accId;
 
-    return accId;
+    const char* sql2 = "SELECT id, accountNumber, userId FROM Accounts WHERE userId = ? AND  id = ?";
+    sqlite3_prepare_v2(dbManager.getDB(), sql2, -1, &stmt, 0);
+    sqlite3_bind_int64(stmt, 1, userId);
+    sqlite3_bind_int64(stmt, 2, accId);
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+        system("cls");
+        cout << "Pomyslnie zalogowano na konto bankowe o numerze " << sqlite3_column_text(stmt, 1);
+        loggedInAccount = true;
+        return accId;
+    }
+    else {
+        system("cls");
+        cout << "Wprowadzono niew³aœciwe id konta!\n";
+        return -1;
+    }
+   
 }
 
 void BankApp::run() {
@@ -67,13 +83,13 @@ void BankApp::run() {
 
             switch (choice) {
             case 1:
+                int choicec;
                 system("cls");
-                if (!loggedIn) {
-                    user.createUser(loggedInUserId);
-                    accounts.createAccount(loggedInUserId, "PLN");
-                    loggedIn = true;
-                }
-                else cout << "Nie mozesz utworzyæ konta uzytkownika bêd¹c zalogowanym" << endl;
+
+                user.createUser(loggedInUserId);
+                accounts.createAccount(loggedInUserId, 1);
+                loggedIn = true;
+               
                 break;
             case 2:
                 system("cls");
@@ -95,17 +111,39 @@ void BankApp::run() {
         }
         else if (loggedIn && !loggedInAccount) {
             loggedInAccountId = selectAccount(loggedInUserId);
-            loggedInAccount = true;
         }
         else if (loggedIn && loggedInAccount) {
-
+            system("cls");
             cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n7.Exit\nChoose an option : ";
             cin >> choice;
 
             switch (choice) {
             case 1:
+                int choicec;
                 system("cls");
-                accounts.createAccount(loggedInUserId, "PLN");
+                cout << "1.Za³ó¿ konto w PLN \n2.Za³ó¿ konto w EUR\n3.Za³ó¿ konto w CHF\n4.Za³ó¿ konto w GBP \n";
+                cin >> choicec;
+                switch (choicec) {
+                case 1:
+                    accounts.createAccount(loggedInUserId, 1);
+                    break;
+
+                case 2:
+                    accounts.createAccount(loggedInUserId, 2);
+                    break;
+                case 3:
+                    accounts.createAccount(loggedInUserId, 3);
+                    break;
+
+                case 4:
+                    accounts.createAccount(loggedInUserId, 4);
+                    break;
+                default:
+                    cout << "Wybierz poprawn¹ opcjê\n";
+                    break;
+
+
+                }
                 break;
             case 2:
                 system("cls");

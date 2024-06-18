@@ -11,7 +11,9 @@ public:
     void showBalance(int loggedInAccountId);
     void depositMoney(int Id, float ammount);
     void withdrawMoney(int AccountId, float ammount);
-    void createAccount(int userId, string currencyId, int& AccountId);
+    void createAccount(int userId, string currencyId);
     bool loginAccount(int userId, int& AccountId);
+    int selectAccount(int userId);
+    void transferMoney(int AccountId);
 };
 

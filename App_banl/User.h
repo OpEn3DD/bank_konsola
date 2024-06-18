@@ -8,8 +8,8 @@ private:
 
 public:
     User(DbManager& dbManager);
-    void techniczna(int& UserId);
-    void createUser();
+    void techniczna();
+    void createUser(int& loggedInAccountId);
     bool login(int& UserId);
     bool isPasswordRight(string password);
     bool isPeselRight(string pesel);

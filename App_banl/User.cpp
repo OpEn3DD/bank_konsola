@@ -13,46 +13,35 @@ User::User(DbManager& dbManager) : dbManager(dbManager) {
         "pesel TEXT NOT NULL, "
         "email TEXT NOT NULL);";
     dbManager.executeSQL(sql);
-
-    const char* sql2 =
-        "CREATE TABLE IF NOT EXISTS Currency ("
-        "id TEXT PRIMARY KEY,  "
-        "currencyName TEXT NOT NULL);";
-    dbManager.executeSQL(sql2);
-
-   
-
 }
 
-void User::techniczna(int& userId) {
-    const char* sql = "SELECT * FROM Users WHERE id = ?;";
-    sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    sqlite3_bind_int(stmt, 1, userId);
+void User::techniczna() {
+    const char* sql = "SELECT id, username FROM Users;";
+    sqlite3_stmt* stmt;
 
-    int rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        for (int i = 0; i < 7; i++)
-        {
-            const unsigned char* info = sqlite3_column_text(stmt, i);
-            cerr << info << endl;
-        }
-        
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
+    //rc = sqlite3_step(stmt);
+
+    if (rc == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+            cout << "ID: " << sqlite3_column_int(stmt, 0) << ", username:  " << sqlite3_column_text(stmt, 1) << endl;
     }
     else {
-        cerr << "Nie udało sie" << endl;
+        cerr << "Nie udało sie pobrac listy. " << sqlite3_errmsg(dbManager.getDB()) << endl;
     }
 
     sqlite3_finalize(stmt);
 }
 
-void User::createUser() {
-    string username, password, pesel, accNumber, email;
+void User::createUser(int& loggedInUserId) {
+    string username, password, pesel, email;
     cout << "Wpisz nazwe uzytkownika: ";
     cin >> username;
     char ch;
 
     do {
-        cout << "Wpisz hasło:";
+        password.clear(); // Czyszczenie hasła przed ponownym wprowadzeniem
+        cout << "Wpisz hasło: ";
         while ((ch = _getch()) != 13) { // 13 to ASCII dla Enter
             if (ch == 8) { // 8 jest ASCII dla Backspace
                 if (!password.empty()) {
@@ -65,38 +54,60 @@ void User::createUser() {
                 cout << '*';
             }
         }
-        //cout << password;
+        cout << endl; // Przechodzenie do nowej linii po wprowadzeniu hasła
     } while (!isPasswordRight(password));
 
     do {
-        cout << "\nWpisz swoj numer pesel ";
+        cout << "Wpisz swoj numer pesel: ";
         cin >> pesel;
     } while (!isPeselRight(pesel));
 
     do {
-        cout << "Wpisz swoj numer email ";
+        cout << "Wpisz swoj numer email: ";
         cin >> email;
     } while (!isEmailRight(email));
 
-
     const char* sql = "INSERT INTO Users (username, password, pesel, email) VALUES (?, ?, ?, ?);";
-    sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
+    if (rc != SQLITE_OK) {
+        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        return;
+    }
+
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, pesel.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, email.c_str(), -1, SQLITE_STATIC);
-    sqlite3_step(stmt);
 
-    const char* sql2 = "INSER INTO Accounts (userId, accountNumber, currencyId) VALUES (?, ?, 1);";
-    sqlite3_prepare_v2(dbManager.getDB(), sql2, -1, &stmt, 0);
-    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
-
-    sqlite3_step(stmt);
-    system("cls");
-    cout << "Stworzono konto użytkownika" << endl;
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        sqlite3_finalize(stmt);
+        return;
+    }
     sqlite3_finalize(stmt);
 
+    const char* sql2 = "SELECT last_insert_rowid()";
+    rc = sqlite3_prepare_v2(dbManager.getDB(), sql2, -1, &stmt, 0);
+    if (rc != SQLITE_OK) {
+        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        return;
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+        loggedInUserId = sqlite3_column_int(stmt, 0);
+        cout << "Logged in Account ID: " << loggedInUserId << endl;
+    }
+    else {
+        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        sqlite3_finalize(stmt);
+        return;
+    }
+    sqlite3_finalize(stmt);
+
+    cout << "Stworzono konto użytkownika.\n" << endl;
 }
 
 bool User::login(int& userId) {
@@ -119,7 +130,7 @@ bool User::login(int& userId) {
     }
     cout << password;
 
-    const char* sql = "SELECT id FROM Users WHERE username = ? AND password = ?;";
+    const char* sql = "SELECT id, username FROM Users WHERE username = ? AND password = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
@@ -129,7 +140,7 @@ bool User::login(int& userId) {
     if (rc == SQLITE_ROW) {
         userId = sqlite3_column_int(stmt, 0);
         system("cls");
-        cout << "Zalogowano" << endl;
+        cout << "Zalogowano, witamy " << sqlite3_column_text(stmt, 1) << ".\n" << endl;
         sqlite3_finalize(stmt);
         return true;
     }

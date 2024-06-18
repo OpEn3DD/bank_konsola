@@ -116,7 +116,7 @@ bool Accounts::loginAccount(int userId, int& AccountId)
 
 }
 
-void Accounts::createAccount(int userId, string currencyId, int& AccountId) {
+void Accounts::createAccount(int userId, string currencyId) {
     string accNumber;
     random_device rd;
     mt19937 eng(rd());
@@ -132,6 +132,7 @@ void Accounts::createAccount(int userId, string currencyId, int& AccountId) {
     sqlite3_bind_text(stmt, 2, accNumber.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, currencyId.c_str(), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
+
     if (rc != SQLITE_DONE) {
         cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
         sqlite3_finalize(stmt);
@@ -155,9 +156,6 @@ void Accounts::createAccount(int userId, string currencyId, int& AccountId) {
     }
     sqlite3_finalize(stmt); 
 
- 
-    AccountId = last_id;
-
     const char* sql3 = "SELECT accountNumber FROM Accounts WHERE id = ?";
     rc = sqlite3_prepare_v2(dbManager.getDB(), sql3, -1, &stmt, 0);
 
@@ -172,3 +170,4 @@ void Accounts::createAccount(int userId, string currencyId, int& AccountId) {
     }
     sqlite3_finalize(stmt);
 }
+

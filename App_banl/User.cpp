@@ -16,21 +16,11 @@ User::User(DbManager& dbManager) : dbManager(dbManager) {
 
     const char* sql2 =
         "CREATE TABLE IF NOT EXISTS Currency ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "id TEXT PRIMARY KEY,  "
         "currencyName TEXT NOT NULL);";
     dbManager.executeSQL(sql2);
 
-    const char* sql3 =
-        "CREATE TABLE IF NOT EXISTS Accounts ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "userId INT NOT NULL, "
-        "accountnumber TEXT NOT NULL, "
-        "balance REAL DEFAULT 0.0, "
-        "currencyId TEXT NOT NULL, "
-        "FOREIGN KEY(userId) REFERENCES Users(id), "
-        "FOREIGN KEY(currencyId) REFERENCES Currency(id));";
-
-    dbManager.executeSQL(sql3);
+   
 
 }
 

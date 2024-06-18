@@ -59,99 +59,9 @@ void BankApp::run() {
     std::cout << "\\__/     \\__|\\______|   \\__|   \\__|  \\__|\\__|     \\__|    \\__|          \\__/     \\__|      \\_______/ \\__|  \\__|\\__|  \\__|\\__|  \\__| \\______/ \n\n";
 
 
-    //while (true) {
-    //    if (!loggedIn) {
-
-    //        cout << "1. Za³ó¿ konto u¿ytkownika\n2. Zaloguj\n7. Exit\nWybierz opcje: ";
-    //        cin >> choice;
-
-    //        switch (choice) {
-    //        case 1:
-    //            system("cls");
-    //            if (!loggedIn) {
-    //                user.createUser(loggedInUserId);
-    //                accounts.createAccount(loggedInUserId, "PLN");
-    //                loggedIn = true;
-    //            }
-    //            else cout << "Nie mozesz utworzyæ konta uzytkownika bêd¹c zalogowanym" << endl;
-    //            break;
-    //        case 2:
-    //            system("cls");
-    //            loggedIn = user.login(loggedInUserId);
-    //            loggedInAccount = false;
-    //            break;
-    //        case 7:
-    //            return;
-    //        case 69:
-    //            user.techniczna();
-    //            break;
-    //        default:
-    //            system("cls");
-    //            cout << "Invalid option. Please try again." << endl;
-    //            std::cin.clear(); // Resetuje flagi b³êdów
-    //            std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
-    //            break;
-    //        }
-    //    }
-    //    else if (loggedIn && !loggedInAccount) {
-    //        loggedInAccountId = selectAccount(loggedInUserId);
-    //        loggedInAccount = true;
-    //    }
-    //    else if (loggedIn && loggedInAccount) {
-
-    //        cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n7.Exit\nChoose an option : ";
-    //        cin >> choice;
-
-    //        switch (choice) {
-    //        case 1:
-    //            system("cls");
-    //            accounts.createAccount(loggedInUserId, "PLN");
-    //            break;
-    //        case 2:
-    //            system("cls");
-    //            accounts.showBalance(loggedInAccountId);
-    //            break;
-    //        case 3:
-    //            system("cls");
-    //            if (loggedIn) {
-    //                cout << "Podaj wp³acan¹ kwote: ";
-    //                cin >> ammount;
-    //                accounts.depositMoney(loggedInAccountId, ammount);
-    //            }
-    //            else cout << "Najpierw musisz siê zalogowac" << endl;
-    //            break;
-    //        case 4:
-    //            system("cls");
-    //            if (loggedIn) {
-    //                cout << "Podaj wyp³acan¹ kwote: ";
-    //                cin >> ammount;
-    //                accounts.withdrawMoney(loggedInAccountId, ammount);
-    //            }
-    //            else cout << "Najpierw musisz siê zalogowac" << endl;
-    //            break;
-    //        case 5:
-    //            loggedInAccount = false;
-    //            break;
-    //        case 6:
-    //            accounts.transferMoney(loggedInAccountId);
-    //            break;
-    //        case 7:
-    //            return;
-    //        case 69:
-    //            user.techniczna();
-    //            break;
-    //        default:
-    //            system("cls");
-    //            cout << "Invalid option. Please try again." << endl;
-    //            std::cin.clear(); // Resetuje flagi b³êdów
-    //            std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
-    //            break;
-    //        }
-    //    }
-    //}
-
     while (true) {
         if (!loggedIn) {
+
             cout << "1. Za³ó¿ konto u¿ytkownika\n2. Zaloguj\n7. Exit\nWybierz opcje: ";
             cin >> choice;
 
@@ -163,9 +73,7 @@ void BankApp::run() {
                     accounts.createAccount(loggedInUserId, "PLN");
                     loggedIn = true;
                 }
-                else {
-                    cout << "Nie mo¿esz utworzyæ konta u¿ytkownika bêd¹c zalogowanym" << endl;
-                }
+                else cout << "Nie mozesz utworzyæ konta uzytkownika bêd¹c zalogowanym" << endl;
                 break;
             case 2:
                 system("cls");
@@ -181,7 +89,7 @@ void BankApp::run() {
                 system("cls");
                 cout << "Invalid option. Please try again." << endl;
                 std::cin.clear(); // Resetuje flagi b³êdów
-                std::cin.ignore(12343234, '\n'); // Czyszczenie strumienia wejœcia
+                std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
                 break;
             }
         }
@@ -190,7 +98,8 @@ void BankApp::run() {
             loggedInAccount = true;
         }
         else if (loggedIn && loggedInAccount) {
-            cout << "1. Za³ó¿ nowe konto bankowe\n2. Poka¿ bilans konta\n3. Wp³aæ œrodki\n4. Wyp³aæ œrodki\n5. Wybierz konto bankowe\n6. Przelej pieni¹dze\n7. Exit\nChoose an option: ";
+
+            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n7.Exit\nChoose an option : ";
             cin >> choice;
 
             switch (choice) {
@@ -204,18 +113,27 @@ void BankApp::run() {
                 break;
             case 3:
                 system("cls");
-                cout << "Podaj wp³acan¹ kwotê: ";
-                cin >> ammount;
-                accounts.depositMoney(loggedInAccountId, ammount);
+                if (loggedIn) {
+                    cout << "Podaj wp³acan¹ kwote: ";
+                    cin >> ammount;
+                    accounts.depositMoney(loggedInAccountId, ammount);
+                }
+                else cout << "Najpierw musisz siê zalogowac" << endl;
                 break;
             case 4:
                 system("cls");
-                cout << "Podaj wyp³acan¹ kwotê: ";
-                cin >> ammount;
-                accounts.withdrawMoney(loggedInAccountId, ammount);
+                if (loggedIn) {
+                    cout << "Podaj wyp³acan¹ kwote: ";
+                    cin >> ammount;
+                    accounts.withdrawMoney(loggedInAccountId, ammount);
+                }
+                else cout << "Najpierw musisz siê zalogowac" << endl;
                 break;
             case 5:
                 loggedInAccount = false;
+                break;
+            case 6:
+                accounts.transferMoney(loggedInAccountId);
                 break;
             case 7:
                 return;
@@ -226,9 +144,10 @@ void BankApp::run() {
                 system("cls");
                 cout << "Invalid option. Please try again." << endl;
                 std::cin.clear(); // Resetuje flagi b³êdów
-                std::cin.ignore(12343234, '\n'); // Czyszczenie strumienia wejœcia
+                std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
                 break;
             }
         }
     }
+
 }

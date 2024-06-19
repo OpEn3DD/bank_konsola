@@ -123,20 +123,25 @@ void BankApp::run() {
                 cin >> choiceC;
                 switch (choiceC) {
                 case 1:
+                    system("cls");
                     accounts.createAccount(loggedInUserId, 1);
                     break;
 
                 case 2:
+                    system("cls");
                     accounts.createAccount(loggedInUserId, 2);
                     break;
                 case 3:
+                    system("cls");
                     accounts.createAccount(loggedInUserId, 3);
                     break;
 
                 case 4:
+                    system("cls");
                     accounts.createAccount(loggedInUserId, 4);
                     break;
                 default:
+                    system("cls");
                     cout << "Wybierz poprawn¹ opcjê\n";
                     break;
 
@@ -174,7 +179,7 @@ void BankApp::run() {
                 break;
             case 7:
                 system("cls");
-                cout << "Czy napewno chcesz usunac konto? Wprowadz podana liczbe aby potwierdziæ: " << loggedInUserId;
+                cout << "Czy napewno chcesz usunac konto? Wprowadz podana liczbe aby potwierdziæ: " << loggedInUserId<<endl;
                 cin >> acc;
                 if (acc == loggedInUserId)
                     user.deleteUser(loggedInUserId, loggedInAccountId, loggedInAccount, loggedIn);

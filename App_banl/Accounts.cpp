@@ -7,13 +7,15 @@
 Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {
     int count{};
 
+    // Tworzenie tabeli Currency, jeśli nie istnieje
     const char* sql =
         "CREATE TABLE IF NOT EXISTS Currency ("
-        "id INT PRIMARY KEY NOT NULL,  "
+        "id INT PRIMARY KEY NOT NULL, "
         "currencyName TEXT NOT NULL, "
         "valueToPln FLOAT NOT NULL); ";
     dbManager.executeSQL(sql);
 
+    // Sprawdzanie ilości wpisów w tabeli Currency
     const char* sql4 = "SELECT COUNT(*) FROM Currency";
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql4, -1, &stmt, 0);
@@ -28,8 +30,8 @@ Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {
         std::cerr << "Nie udało sie przeprowadzić operacji: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
 
-    if (count == 0)
-    {
+    // Wstawianie początkowych danych do tabeli Currency, jeśli jest pusta
+    if (count == 0) {
         const char* sql2 =
             "INSERT INTO Currency (id, currencyName, valueToPln) VALUES (1, 'PLN', 1); "
             "INSERT INTO Currency (id, currencyName, valueToPln) VALUES (2, 'EUR', 4.30); "
@@ -38,6 +40,7 @@ Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {
         dbManager.executeSQL(sql2);
     }
 
+    // Tworzenie tabeli Accounts, jeśli nie istnieje
     const char* sql3 =
         "CREATE TABLE IF NOT EXISTS Accounts ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -52,20 +55,20 @@ Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {
 
 void Accounts::showBalance(int loggedInAccountId) {
     const char* sql = "SELECT Accounts.balance, Currency.currencyName FROM Accounts JOIN Currency ON Accounts.currencyId = Currency.id WHERE Accounts.id = ?;";
+    sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     sqlite3_bind_int64(stmt, 1, loggedInAccountId);
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
-        cout << "Bilans twojego konta: " << sqlite3_column_double(stmt, 0) << " "<< sqlite3_column_text(stmt, 1)<< endl;
+        std::cout << "Bilans twojego konta: " << sqlite3_column_double(stmt, 0) << " " << sqlite3_column_text(stmt, 1) << std::endl;
     }
     else {
-        cerr << "Nie udało sie pobrac bilansu twojego konta " <<sqlite3_errmsg(dbManager.getDB())<<endl;
+        std::cerr << "Nie udało sie pobrać bilansu twojego konta: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
-
     sqlite3_finalize(stmt);
 }
 
-void Accounts::depositMoney(int accountId, float ammount) {
+void Accounts::depositMoney(int accountId, float amount) {
     const char* sql = "UPDATE Accounts SET balance = balance + ? WHERE id = ?;";
     sqlite3_stmt* stmt;
     int rc;
@@ -73,22 +76,22 @@ void Accounts::depositMoney(int accountId, float ammount) {
     // Przygotowanie zapytania
     rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     if (rc != SQLITE_OK) {
-        cerr << "Nie udało się przygotować zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        std::cerr << "Nie udało się przygotować zapytania: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
         return;
     }
 
     // Bindowanie parametrów
-    sqlite3_bind_int(stmt, 1, ammount);
+    sqlite3_bind_double(stmt, 1, amount);
     sqlite3_bind_int(stmt, 2, accountId);
 
     // Wykonanie zapytania
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_DONE) {
         system("cls");
-        cout << "Wpłacono środki. Kwota: " << ammount << " złotych." << endl;
+        std::cout << "Wpłacono środki. Kwota: " << amount << " złotych." << std::endl;
     }
     else {
-        cerr << "Wpłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << endl;
+        std::cerr << "Wpłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << std::endl;
     }
 
     // Zwolnienie zasobów
@@ -103,30 +106,30 @@ void Accounts::withdrawMoney(int accountId, float amount) {
     // Przygotowanie zapytania
     rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
     if (rc != SQLITE_OK) {
-        cerr << "Nie udało się przygotować zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        std::cerr << "Nie udało się przygotować zapytania: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
         return;
     }
 
     // Bindowanie parametrów
-    sqlite3_bind_int(stmt, 1, amount);
+    sqlite3_bind_double(stmt, 1, amount);
     sqlite3_bind_int(stmt, 2, accountId);
-    sqlite3_bind_int(stmt, 3, amount);
+    sqlite3_bind_double(stmt, 3, amount);
 
     // Wykonanie zapytania
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_DONE) {
         if (sqlite3_changes(dbManager.getDB()) > 0) {
             system("cls");
-            cout << "Wypłacono środki. Kwota: " << amount << " złotych." << endl;
+            std::cout << "Wypłacono środki. Kwota: " << amount << " złotych." << std::endl;
         }
         else {
             system("cls");
-            cerr << "Wypłata nie przebiegła pomyślnie! Upewnij się, że masz wystarczającą ilość środków." << endl;
+            std::cerr << "Wypłata nie przebiegła pomyślnie! Upewnij się, że masz wystarczającą ilość środków." << std::endl;
         }
     }
     else {
         system("cls");
-        cerr << "Wypłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << endl;
+        std::cerr << "Wypłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << std::endl;
     }
 
     // Zwolnienie zasobów
@@ -134,77 +137,82 @@ void Accounts::withdrawMoney(int accountId, float amount) {
 }
 
 void Accounts::createAccount(int userId, int currencyId) {
-    string accNumber;
-    random_device rd;
-    mt19937 eng(rd());
-    uniform_int_distribution<> distr(0, 9);
+    std::string accNumber;
+    std::random_device rd;
+    std::mt19937 eng(rd());
+    std::uniform_int_distribution<> distr(0, 9);
+
+    // Generowanie losowego numeru konta
     for (int i = 0; i < 9; ++i)
         accNumber += std::to_string(distr(eng));
 
-
-    const char* sql = "INSERT INTO Accounts(userId,accountnumber,balance,currencyId) VALUES (?,?,0.0,?);";
+    const char* sql = "INSERT INTO Accounts(userId, accountnumber, balance, currencyId) VALUES (?, ?, 0.0, ?);";
+    sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
 
+    // Bindowanie parametrów
     sqlite3_bind_int64(stmt, 1, userId);
     sqlite3_bind_text(stmt, 2, accNumber.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt, 3, currencyId);
     rc = sqlite3_step(stmt);
 
     if (rc != SQLITE_DONE) {
-        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        std::cerr << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
         sqlite3_finalize(stmt);
         return;
     }
-    sqlite3_finalize(stmt); 
+    sqlite3_finalize(stmt);
 
+    // Pobieranie ID ostatnio dodanego wiersza
     const char* sql2 = "SELECT last_insert_rowid()";
     rc = sqlite3_prepare_v2(dbManager.getDB(), sql2, -1, &stmt, 0);
-
-
     rc = sqlite3_step(stmt);
     int last_id = 0;
     if (rc == SQLITE_ROW) {
         last_id = sqlite3_column_int(stmt, 0);
     }
     else {
-        cout << "SQl error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        std::cerr << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
         sqlite3_finalize(stmt);
         return;
     }
-    sqlite3_finalize(stmt); 
+    sqlite3_finalize(stmt);
 
+    // Pobieranie numeru konta na podstawie ID
     const char* sql3 = "SELECT accountNumber FROM Accounts WHERE id = ?";
     rc = sqlite3_prepare_v2(dbManager.getDB(), sql3, -1, &stmt, 0);
-
-
     sqlite3_bind_int64(stmt, 1, last_id);
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
-        cout << "Pomyslnie utworzono konto bankowe o numerze " << sqlite3_column_text(stmt, 0)<<endl;
+        std::cout << "Pomyślnie utworzono konto bankowe o numerze " << sqlite3_column_text(stmt, 0) << std::endl;
     }
     else {
-        cout << "Nie udało się utworzyć konta: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        std::cerr << "Nie udało się utworzyć konta: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
     sqlite3_finalize(stmt);
 }
 
 void Accounts::transferMoney(int AccountId) {
     int curra, currrec;
-
     int receiverId;
     double amount;
+
+    // Pobieranie numeru konta odbiorcy
     cout << "Wpisz na jakie konto chcesz wysłać przelew: ";
     cin >> receiverId;
-    std::cin.clear(); // Resetuje flagi błędów
+    std::cin.clear(); // Resetowanie flag błędów
     std::cin.ignore(12343234, '\n'); // Czyszczenie strumienia wejścia
+
+    // Pobieranie kwoty do przelania
     cout << "Wpisz kwotę: ";
     cin >> amount;
-    std::cin.clear(); // Resetuje flagi błędów
+    std::cin.clear(); // Resetowanie flag błędów
     std::cin.ignore(12343234, '\n'); // Czyszczenie strumienia wejścia
 
     sqlite3_stmt* stmt;
     system("cls");
-    // Get sender's currencyId
+
+    // Pobieranie currencyId nadawcy
     const char* sql3 = "SELECT currencyId FROM Accounts WHERE id = ?";
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql3, -1, &stmt, 0);
     if (rc == SQLITE_OK) {
@@ -214,19 +222,19 @@ void Accounts::transferMoney(int AccountId) {
             curra = sqlite3_column_int(stmt, 0);
         }
         else {
-            cout << "Nie udało się przeprowadzic transakcji. Upewnij się, że poprawnie wpisałeś numer konta " << endl;
+            cout << "Nie udało się przeprowadzić transakcji. Upewnij się, że poprawnie wpisałeś numer konta." << endl;
             sqlite3_finalize(stmt);
             system("cls");
             return;
         }
     }
     else {
-        cout << "Nie udało się przeprowadzic transakcji. Błąd przygotowania zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        cout << "Nie udało się przeprowadzić transakcji. Błąd przygotowania zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
         return;
     }
     sqlite3_finalize(stmt);
 
-    // Get receiver's currencyId
+    // Pobieranie currencyId odbiorcy
     const char* sql4 = "SELECT currencyId FROM Accounts WHERE accountnumber = ?";
     rc = sqlite3_prepare_v2(dbManager.getDB(), sql4, -1, &stmt, 0);
     if (rc == SQLITE_OK) {
@@ -236,17 +244,18 @@ void Accounts::transferMoney(int AccountId) {
             currrec = sqlite3_column_int(stmt, 0);
         }
         else {
-            cout << "Nie udało się przeprowadzic transakcji. Upewnij się, że poprawnie wpisałeś numer konta " << endl;
+            cout << "Nie udało się przeprowadzić transakcji. Upewnij się, że poprawnie wpisałeś numer konta." << endl;
             sqlite3_finalize(stmt);
             return;
         }
     }
     else {
-        cout << "Nie udało się przeprowadzic transakcji. Błąd przygotowania zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        cout << "Nie udało się przeprowadzić transakcji. Błąd przygotowania zapytania: " << sqlite3_errmsg(dbManager.getDB()) << endl;
         return;
     }
     sqlite3_finalize(stmt);
 
+    // Sprawdzenie, czy waluty są takie same
     if (curra == currrec) {
         rc = sqlite3_exec(dbManager.getDB(), "BEGIN TRANSACTION;", 0, 0, 0);
         if (rc != SQLITE_OK) {
@@ -254,7 +263,7 @@ void Accounts::transferMoney(int AccountId) {
             return;
         }
 
-        // Update sender's balance
+        // Aktualizacja salda nadawcy
         const char* sqlUpdateSender = "UPDATE Accounts SET balance = balance - ? WHERE id = ? AND balance >= ?";
         rc = sqlite3_prepare_v2(dbManager.getDB(), sqlUpdateSender, -1, &stmt, 0);
         if (rc == SQLITE_OK) {
@@ -279,7 +288,7 @@ void Accounts::transferMoney(int AccountId) {
             return;
         }
 
-        // Update receiver's balance
+        // Aktualizacja salda odbiorcy
         const char* sqlUpdateReceiver = "UPDATE Accounts SET balance = balance + ? WHERE accountnumber = ?";
         rc = sqlite3_prepare_v2(dbManager.getDB(), sqlUpdateReceiver, -1, &stmt, 0);
         if (rc == SQLITE_OK) {
@@ -303,6 +312,7 @@ void Accounts::transferMoney(int AccountId) {
             return;
         }
 
+        // Zatwierdzenie transakcji
         rc = sqlite3_exec(dbManager.getDB(), "COMMIT;", 0, 0, 0);
         if (rc == SQLITE_OK) {
             system("cls");
@@ -313,7 +323,7 @@ void Accounts::transferMoney(int AccountId) {
         }
     }
     else {
-        cerr << "Transakcje miedzywalutowe nie są obsługiwane!" << endl;
+        cerr << "Transakcje międzywalutowe nie są obsługiwane!" << endl;
     }
 }
 
@@ -321,9 +331,10 @@ void Accounts::deleteAccount(int AccountId, bool& loggedInAccount, int UserId) {
     int count{};
     sqlite3_stmt* stmt;
 
+    // Sprawdzenie ilości kont użytkownika
     const char* sql4 = "SELECT COUNT(*) FROM Accounts WHERE userId = ?";
     int rc = sqlite3_prepare_v2(dbManager.getDB(), sql4, -1, &stmt, 0);
-    sqlite3_bind_int64(stmt, 1, AccountId);
+    sqlite3_bind_int64(stmt, 1, UserId);
 
     if (rc == SQLITE_OK) {
         rc = sqlite3_step(stmt);
@@ -333,12 +344,12 @@ void Accounts::deleteAccount(int AccountId, bool& loggedInAccount, int UserId) {
         sqlite3_finalize(stmt);
     }
     else {
-        std::cerr << "Nie udało sie przeprowadzić operacji: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
+        std::cerr << "Nie udało się przeprowadzić operacji: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
 
+    // Usunięcie konta, jeśli użytkownik ma więcej niż jedno konto
     if (count > 1) {
-        const char* sql =
-            "DELETE FROM Accounts WHERE id = ?; ";
+        const char* sql = "DELETE FROM Accounts WHERE id = ?; ";
         int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
         if (rc != SQLITE_OK) {
             cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
@@ -363,9 +374,6 @@ void Accounts::deleteAccount(int AccountId, bool& loggedInAccount, int UserId) {
     }
     else {
         system("cls");
-        cout << "Nie można usunąc swojego jedynego konta bankowego!\n";
+        cout << "Nie można usunąć swojego jedynego konta bankowego!\n";
     }
-
-    
-
 }

@@ -1,7 +1,6 @@
 #pragma once
 #include "DbManager.h"
 #include "Accounts.h"
-#include "Currency.h"
 #include "User.h"
 class BankApp
 {

@@ -49,7 +49,7 @@ int BankApp::selectAccount(int userId) {
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
         system("cls");
-        cout << "Pomyslnie zalogowano na konto bankowe o numerze " << sqlite3_column_text(stmt, 1);
+        cout << "Pomyslnie zalogowano na konto bankowe o numerze " << sqlite3_column_text(stmt, 1) << "\n";
         loggedInAccount = true;
         return accId;
     }
@@ -113,17 +113,17 @@ void BankApp::run() {
             loggedInAccountId = selectAccount(loggedInUserId);
         }
         else if (loggedIn && loggedInAccount) {
-            system("cls");
+            int acc{};
             cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n7.Exit\nChoose an option : ";
             cin >> choice;
 
             switch (choice) {
             case 1:
-                int choicec;
+                int choiceC;
                 system("cls");
                 cout << "1.Za³ó¿ konto w PLN \n2.Za³ó¿ konto w EUR\n3.Za³ó¿ konto w CHF\n4.Za³ó¿ konto w GBP \n";
-                cin >> choicec;
-                switch (choicec) {
+                cin >> choiceC;
+                switch (choiceC) {
                 case 1:
                     accounts.createAccount(loggedInUserId, 1);
                     break;
@@ -174,6 +174,16 @@ void BankApp::run() {
                 accounts.transferMoney(loggedInAccountId);
                 break;
             case 7:
+                system("cls");
+                cout << "Czy napewno chcesz usunac konto? Wprowadz podana liczbe aby potwierdziæ: " << loggedInUserId;
+                cin >> acc;
+                if (acc == loggedInUserId)
+                    user.deleteUser(loggedInUserId, loggedInAccountId, loggedInAccount, loggedIn);
+                else
+                    cout << "Wprowadzono niepoprawn¹ liczbe!";
+
+                break;
+            case 8:
                 return;
             case 69:
                 user.techniczna();

@@ -14,6 +14,6 @@ public:
     bool isPasswordRight(string password);
     bool isPeselRight(string pesel);
     bool isEmailRight(string email);
-    bool deleteUser();
+    void deleteUser(int& userId, int& loggedInAccountId, bool& loggedInAccount, bool& loggedIn);
 };
 

@@ -134,21 +134,6 @@ void Accounts::withdrawMoney(int accountId, float amount) {
     sqlite3_finalize(stmt);
 }
 
-bool Accounts::loginAccount(int trueUserId, int& AccountId)
-{
-  /*  const char* sql2 = "SELECT id, accountNumber, userId FROM Accounts WHERE userId = ?";
-    sqlite3_prepare_v2(dbManager.getDB(), sql2, -1, &stmt, 0);
-    sqlite3_bind_int64(stmt, 1, userId);
-    int rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
-        if()
-        cout << "Pomyslnie zalogowano na konto bankowe o numerze " << sqlite3_column_text(stmt, 1);
-        return true;
-    }*/
-    return false;
-
-}
-
 void Accounts::createAccount(int userId, int currencyId) {
     string accNumber;
     random_device rd;

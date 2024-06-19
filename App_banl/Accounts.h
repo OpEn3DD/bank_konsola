@@ -12,8 +12,6 @@ public:
     void depositMoney(int Id, float ammount);
     void withdrawMoney(int AccountId, float ammount);
     void createAccount(int userId, int currencyId);
-    bool loginAccount(int userId, int& AccountId);
-    int selectAccount(int userId);
     void transferMoney(int AccountId);
 };
 

@@ -47,7 +47,7 @@ void User::createUser(int& loggedInUserId) {
         password.clear(); // Czyszczenie hasła przed ponownym wprowadzeniem
         cout << "Wpisz hasło: ";
         while ((ch = _getch()) != 13) { // 13 to ASCII dla Enter
-            if (ch == 8) { // 8 jest ASCII dla Backspace
+            if (ch == 8) { // 8 to ASCII dla Backspace
                 if (!password.empty()) {
                     cout << "\b \b"; // Usuwanie ostatniego znaku
                     password.pop_back();
@@ -111,7 +111,7 @@ void User::createUser(int& loggedInUserId) {
     }
     sqlite3_finalize(stmt);
     system("cls");
-    cout << "Stworzono konto użytkownika.\n" << endl;
+    cout << "Stworzono konto użytkownika." << endl;
 }
 
 bool User::login(int& userId) {
@@ -132,7 +132,6 @@ bool User::login(int& userId) {
             cout << '*';
         }
     }
-    cout << password;
 
     const char* sql = "SELECT id, username FROM Users WHERE username = ? AND password = ?;";
     sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
@@ -144,12 +143,13 @@ bool User::login(int& userId) {
     if (rc == SQLITE_ROW) {
         userId = sqlite3_column_int(stmt, 0);
         system("cls");
-        cout << "Zalogowano, witamy " << sqlite3_column_text(stmt, 1) << ".\n" << endl;
+        cout << "Zalogowano, witamy " << sqlite3_column_text(stmt, 1)<< endl;
         sqlite3_finalize(stmt);
         return true;
     }
     else {
-        cerr << "Nie udało sie zalogowac" << endl;
+        system("cls");
+        cerr << "Nie udało sie zalogowac\n";
         sqlite3_finalize(stmt);
         return false;
     }

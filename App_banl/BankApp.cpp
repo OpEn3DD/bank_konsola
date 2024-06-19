@@ -23,8 +23,6 @@ int BankApp::selectAccount(int userId) {
 
     sqlite3_bind_int64(stmt, 1, userId);
 
-    cout << "User ID: " << userId << endl;
-
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         cout << "ID konta: " << sqlite3_column_int(stmt, 0)
             << ", numer konta: " << sqlite3_column_text(stmt, 1)
@@ -65,20 +63,20 @@ void BankApp::run() {
     int choice{};
     int ammount{};
 
-    std::cout << "$$\\      $$\\ $$$$$$\\ $$$$$$$$\\  $$$$$$\\  $$\\      $$\\ $$\\     $$\\       $$\\      $$\\       $$$$$$$\\   $$$$$$\\  $$\\   $$\\ $$\\   $$\\ $$\\   $$\\ \n";
-    std::cout << "$$ | $\\  $$ |\\_$$  _|\\__$$  __|$$  __$$\\ $$$\\    $$$ |\\$$\\   $$  |      $$ | $\\  $$ |      $$  __$$\\ $$  __$$\\ $$$\\  $$ |$$ | $$  |$$ |  $$ |\n";
-    std::cout << "$$ |$$$\\ $$ |  $$ |     $$ |   $$ /  $$ |$$$$\\  $$$$ | \\$$\\ $$  /       $$ |$$$\\ $$ |      $$ |  $$ |$$ /  $$ |$$$$\\ $$ |$$ |$$  / $$ |  $$ |\n";
-    std::cout << "$$ $$ $$\\$$ |  $$ |     $$ |   $$$$$$$$ |$$\\$$\\$$ $$ |  \\$$$$  /        $$ $$ $$\\$$ |      $$$$$$$\\ |$$$$$$$$ |$$ $$\\$$ |$$$$$  /  $$ |  $$ |\n";
-    std::cout << "$$$$  _$$$$ |  $$ |     $$ |   $$  __$$ |$$ \\$$$  $$ |   \\$$  /         $$$$  _$$$$ |      $$  __$$\\ $$  __$$ |$$ \\$$$$ |$$  $$<   $$ |  $$ |\n";
-    std::cout << "$$$  / \\$$$ |  $$ |     $$ |   $$ |  $$ |$$ |\\$  /$$ |    $$ |          $$$  / \\$$$ |      $$ |  $$ |$$ |  $$ |$$ |\\$$$ |$$ |\\$$\\  $$ |  $$ |\n";
-    std::cout << "$$  /   \\$$ |$$$$$$\\    $$ |   $$ |  $$ |$$ | \\_/ $$ |    $$ |          $$  /   \\$$ |      $$$$$$$  |$$ |  $$ |$$ | \\$$ |$$ | \\$$\\ \\$$$$$$  |\n";
-    std::cout << "\\__/     \\__|\\______|   \\__|   \\__|  \\__|\\__|     \\__|    \\__|          \\__/     \\__|      \\_______/ \\__|  \\__|\\__|  \\__|\\__|  \\__| \\______/ \n\n";
-
-
     while (true) {
+        std::cout << "=========================================\n\n";
+        std::cout << " /$$$$$$$                      /$$      \n";
+        std::cout << "| $$__  $$                    | $$      \n";
+        std::cout << "| $$  \\ $$  /$$$$$$  /$$$$$$$ | $$   /$$\n";
+        std::cout << "| $$$$$$$  |____  $$| $$__  $$| $$  /$$/\n";
+        std::cout << "| $$__  $$  /$$$$$$$| $$  \\ $$| $$$$$$/ \n";
+        std::cout << "| $$  \\ $$ /$$__  $$| $$  | $$| $$_  $$ \n";
+        std::cout << "| $$$$$$$/|  $$$$$$$| $$  | $$| $$ \\  $$\n";
+        std::cout << "|_______/  \\_______/|__/  |__/|__/  \\__/\n\n";
+
         if (!loggedIn) {
 
-            cout << "1. Za³ó¿ konto u¿ytkownika\n2. Zaloguj\n7. Exit\nWybierz opcje: ";
+            cout << "1. Za³ó¿ konto u¿ytkownika\n2. Zaloguj\n3. Exit\nWybierz opcje: ";
             cin >> choice;
 
             switch (choice) {
@@ -96,14 +94,14 @@ void BankApp::run() {
                 loggedIn = user.login(loggedInUserId);
                 loggedInAccount = false;
                 break;
-            case 7:
+            case 3:
                 return;
             case 69:
                 user.techniczna();
                 break;
             default:
                 system("cls");
-                cout << "Invalid option. Please try again." << endl;
+                cout << "B³êdna opcja. Spróbuj ponownie!" << endl;
                 std::cin.clear(); // Resetuje flagi b³êdów
                 std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
                 break;
@@ -114,7 +112,7 @@ void BankApp::run() {
         }
         else if (loggedIn && loggedInAccount) {
             int acc{};
-            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n6.Przelew\n7.Usun konto\n8.Usun konto bankowe\n9.Exit\nChoose an option : ";
+            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Przelew\n6.Wyloguj z konta bankkowego\n7.Usun konto\n8.Usun konto bankowe\n9.Exit\nWybierz opcjê : ";
             cin >> choice;
 
             switch (choice) {
@@ -168,10 +166,11 @@ void BankApp::run() {
                 else cout << "Najpierw musisz siê zalogowac" << endl;
                 break;
             case 5:
-                loggedInAccount = false;
+                accounts.transferMoney(loggedInAccountId);
                 break;
             case 6:
-                accounts.transferMoney(loggedInAccountId);
+                loggedInAccount = false;
+                system("cls");
                 break;
             case 7:
                 system("cls");
@@ -193,7 +192,7 @@ void BankApp::run() {
                 break;
             default:
                 system("cls");
-                cout << "Invalid option. Please try again." << endl;
+                cout << "B³êdna opcja. Spróbuj ponownie!" << endl;
                 std::cin.clear(); // Resetuje flagi b³êdów
                 std::cin.ignore(12343234, '\n');//Czysczenie strumienia wejscia
                 break;

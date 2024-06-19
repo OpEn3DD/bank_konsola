@@ -88,7 +88,7 @@ void Accounts::depositMoney(int accountId, float amount) {
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_DONE) {
         system("cls");
-        std::cout << "Wpłacono środki. Kwota: " << amount << " złotych." << std::endl;
+        std::cout << "Wpłacono środki. Kwota: " << amount << std::endl;
     }
     else {
         std::cerr << "Wpłata nie przebiegła pomyślnie! Skontaktuj się z infolinią." << std::endl;
@@ -120,7 +120,7 @@ void Accounts::withdrawMoney(int accountId, float amount) {
     if (rc == SQLITE_DONE) {
         if (sqlite3_changes(dbManager.getDB()) > 0) {
             system("cls");
-            std::cout << "Wypłacono środki. Kwota: " << amount << " złotych." << std::endl;
+            std::cout << "Wypłacono środki. Kwota: " << amount<< std::endl;
         }
         else {
             system("cls");

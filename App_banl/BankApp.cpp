@@ -61,7 +61,7 @@ int BankApp::selectAccount(int userId) {
 
 void BankApp::run() {
     int choice{};
-    int ammount{};
+    float ammount{};
 
     while (true) {
         std::cout << "=========================================\n\n";
@@ -81,7 +81,6 @@ void BankApp::run() {
 
             switch (choice) {
             case 1:
-                int choicec;
                 system("cls");
 
                 user.createUser(loggedInUserId);
@@ -96,9 +95,9 @@ void BankApp::run() {
                 break;
             case 3:
                 return;
-            case 69:
-                user.techniczna();
-                break;
+            //case 65:
+            //    user.techniczna();
+            //    break;
             default:
                 system("cls");
                 cout << "B³êdna opcja. Spróbuj ponownie!" << endl;
@@ -112,14 +111,14 @@ void BankApp::run() {
         }
         else if (loggedIn && loggedInAccount) {
             int acc{};
-            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Przelew\n6.Wyloguj z konta bankkowego\n7.Usun konto\n8.Usun konto bankowe\n9.Exit\nWybierz opcjê : ";
+            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyp³aæ œrodki\n5.Przelew\n6.Wyloguj z konta bankkowego\n7.Usun konto\n8.Usun konto bankowe\n9.Exit\nWybierz opcjê : ";
             cin >> choice;
 
             switch (choice) {
             case 1:
                 int choiceC;
                 system("cls");
-                cout << "1.Za³ó¿ konto w PLN \n2.Za³ó¿ konto w EUR\n3.Za³ó¿ konto w CHF\n4.Za³ó¿ konto w GBP \n";
+                cout << "1.Za³ó¿ konto w PLN \n2.Za³ó¿ konto w EUR\n3.Za³ó¿ konto w CHF\n4.Za³ó¿ konto w GBP \nWybierz opcjê: ";
                 cin >> choiceC;
                 switch (choiceC) {
                 case 1:
@@ -183,18 +182,19 @@ void BankApp::run() {
                 cin >> acc;
                 if (acc == loggedInUserId)
                     user.deleteUser(loggedInUserId, loggedInAccountId, loggedInAccount, loggedIn);
-                else
-                    cout << "Wprowadzono niepoprawn¹ liczbe!";
-
+                else {
+                    system("cls");
+                    cout << "Wprowadzono niepoprawn¹ liczbe!\n";
+                }
                 break;
             case 8:
                 accounts.deleteAccount(loggedInAccountId, loggedInAccount, loggedInUserId);
                 break;
             case 9:
                 return;
-            case 69:
+           /* case 60:
                 user.techniczna();
-                break;
+                break;*/
             default:
                 system("cls");
                 cout << "B³êdna opcja. Spróbuj ponownie!" << endl;

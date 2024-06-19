@@ -35,8 +35,12 @@ void User::techniczna() {
 
 void User::createUser(int& loggedInUserId) {
     string username, password, pesel, email;
-    cout << "Wpisz nazwe uzytkownika: ";
-    cin >> username;
+    do {
+        password.clear();
+        cout << "Wpisz nazwe uzytkownika: ";
+        cin >> username;
+    }while(!isUsernameRight(username));
+ 
     char ch;
 
     do {
@@ -98,15 +102,15 @@ void User::createUser(int& loggedInUserId) {
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
         loggedInUserId = sqlite3_column_int(stmt, 0);
-        cout << "Logged in Account ID: " << loggedInUserId << endl;
+        //cout << "Logged in Account ID: " << loggedInUserId << endl;
     }
     else {
-        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        cout << "Nie udało sie zalogować na konto: " << sqlite3_errmsg(dbManager.getDB()) << endl;
         sqlite3_finalize(stmt);
         return;
     }
     sqlite3_finalize(stmt);
-
+    system("cls");
     cout << "Stworzono konto użytkownika.\n" << endl;
 }
 
@@ -209,6 +213,35 @@ bool User::isEmailRight(string email) {
     // Sprawdzanie, czy wprowadzony email pasuje do wzorca
     return std::regex_match(email, pattern);
 
+}
+
+bool User::isUsernameRight(string username)
+{
+    int count{};
+    sqlite3_stmt* stmt;
+
+    const char* sql4 = "SELECT COUNT(*) FROM Users WHERE username = ?";
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql4, -1, &stmt, 0);
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+
+    if (rc == SQLITE_OK) {
+        rc = sqlite3_step(stmt);
+        if (rc == SQLITE_ROW) {
+            count = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    }
+    else {
+        std::cerr << "Nie udało sie przeprowadzić operacji: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
+    }
+
+    if (count >= 1) {
+        system("cls");
+        cout << "Nazwa użytkownika musi być unikalna\n";
+        return false;
+    }
+    else
+        return true;
 }
 
 void User::deleteUser(int& userId, int& loggedInAccountId, bool& loggedInAccount, bool& loggedIn) {

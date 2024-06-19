@@ -184,7 +184,7 @@ void BankApp::run() {
 
                 break;
             case 8:
-                accounts.deleteAccount(loggedInAccountId, loggedInAccount);
+                accounts.deleteAccount(loggedInAccountId, loggedInAccount, loggedInUserId);
                 break;
             case 9:
                 return;

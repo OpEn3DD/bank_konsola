@@ -13,6 +13,6 @@ public:
     void withdrawMoney(int AccountId, float ammount);
     void createAccount(int userId, int currencyId);
     void transferMoney(int AccountId);
-    void deleteAccount(int AccountId, bool& loggedInAccount);
+    void deleteAccount(int AccountId, bool& loggedInAccount, int UserId);
 };
 

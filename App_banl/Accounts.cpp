@@ -25,7 +25,7 @@ Accounts::Accounts(DbManager& dbManager) : dbManager(dbManager) {
         sqlite3_finalize(stmt);
     }
     else {
-        std::cerr << "Failed to execute statement: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
+        std::cerr << "Nie udało sie przeprowadzić operacji: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
 
     if (count == 0)
@@ -317,30 +317,55 @@ void Accounts::transferMoney(int AccountId) {
     }
 }
 
-void Accounts::deleteAccount(int AccountId, bool& loggedInAccount) {
-    const char* sql =
-        "DELETE FROM Accounts WHERE id = ?; ";
-
+void Accounts::deleteAccount(int AccountId, bool& loggedInAccount, int UserId) {
+    int count{};
     sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-    if (rc != SQLITE_OK) {
-        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
-        return;
-    }
 
+    const char* sql4 = "SELECT COUNT(*) FROM Accounts WHERE userId = ?";
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql4, -1, &stmt, 0);
     sqlite3_bind_int64(stmt, 1, AccountId);
 
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+    if (rc == SQLITE_OK) {
+        rc = sqlite3_step(stmt);
+        if (rc == SQLITE_ROW) {
+            count = sqlite3_column_int(stmt, 0);
+        }
         sqlite3_finalize(stmt);
-        return;
+    }
+    else {
+        std::cerr << "Nie udało sie przeprowadzić operacji: " << sqlite3_errmsg(dbManager.getDB()) << std::endl;
     }
 
-    sqlite3_finalize(stmt);
+    if (count > 1) {
+        const char* sql =
+            "DELETE FROM Accounts WHERE id = ?; ";
+        int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
+        if (rc != SQLITE_OK) {
+            cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+            return;
+        }
 
-    system("cls");
-    cout << "Pomyślnie usunięto konto bankowe." << endl;
-    loggedInAccount = false;
+        sqlite3_bind_int64(stmt, 1, AccountId);
+
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+            sqlite3_finalize(stmt);
+            return;
+        }
+
+        sqlite3_finalize(stmt);
+
+        system("cls");
+        cout << "Pomyślnie usunięto konto bankowe." << endl;
+        loggedInAccount = false;
+
+    }
+    else {
+        system("cls");
+        cout << "Nie można usunąc swojego jedynego konta bankowego!";
+    }
+
+    
 
 }

@@ -317,4 +317,30 @@ void Accounts::transferMoney(int AccountId) {
     }
 }
 
+void Accounts::deleteAccount(int AccountId, bool& loggedInAccount) {
+    const char* sql =
+        "DELETE FROM Accounts WHERE id = ?; ";
 
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
+    if (rc != SQLITE_OK) {
+        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        return;
+    }
+
+    sqlite3_bind_int64(stmt, 1, AccountId);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        cout << "SQL error: " << sqlite3_errmsg(dbManager.getDB()) << endl;
+        sqlite3_finalize(stmt);
+        return;
+    }
+
+    sqlite3_finalize(stmt);
+
+    system("cls");
+    cout << "Pomyślnie usunięto konto bankowe." << endl;
+    loggedInAccount = false;
+
+}

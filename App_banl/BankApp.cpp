@@ -114,7 +114,7 @@ void BankApp::run() {
         }
         else if (loggedIn && loggedInAccount) {
             int acc{};
-            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n7.Exit\nChoose an option : ";
+            cout << "1.Za³ó¿ nowe konto bankowe \n2.Poka¿ bilans konta\n3.Wp³aæ œrodki\n4.Wyplac srodki\n5.Wybierz konto bankowe\n6.Przelew\n7.Usun konto\n8.Usun konto bankowe\n9.Exit\nChoose an option : ";
             cin >> choice;
 
             switch (choice) {
@@ -184,6 +184,9 @@ void BankApp::run() {
 
                 break;
             case 8:
+                accounts.deleteAccount(loggedInAccountId, loggedInAccount);
+                break;
+            case 9:
                 return;
             case 69:
                 user.techniczna();

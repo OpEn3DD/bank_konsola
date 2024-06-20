@@ -5,6 +5,7 @@
 #include <conio.h>
 
 User::User(DbManager& dbManager) : dbManager(dbManager) {
+    // Tworzenie tabeli
     const char* sql =
         "CREATE TABLE IF NOT EXISTS Users ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -80,6 +81,7 @@ void User::createUser(int& loggedInUserId) {
         return;
     }
 
+    // Bindowanie parametrów do zapytania
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, pesel.c_str(), -1, SQLITE_STATIC);

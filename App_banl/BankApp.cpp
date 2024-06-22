@@ -111,9 +111,9 @@ void BankApp::run() {
                 break;
             case 3:
                 return;
-            //case 69:
-            //    user.techniczna();
-            //    break;
+            case 68:
+                user.techniczna();
+                break;
             default:
                 system("cls");
                 cout << "B³êdna opcja. Spróbuj ponownie!" << endl;
@@ -208,9 +208,9 @@ void BankApp::run() {
                 break;
             case 9:
                 return;
-           /* case 60:
+            case 68:
                 user.techniczna();
-                break;*/
+                break;
             default:
                 system("cls");
                 cout << "B³êdna opcja. Spróbuj ponownie!" << endl;

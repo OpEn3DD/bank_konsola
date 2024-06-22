@@ -5,6 +5,7 @@
 #include <conio.h>
 
 User::User(DbManager& dbManager) : dbManager(dbManager) {
+    // Tworzenie tabeli
     const char* sql =
         "CREATE TABLE IF NOT EXISTS Users ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -15,23 +16,23 @@ User::User(DbManager& dbManager) : dbManager(dbManager) {
     dbManager.executeSQL(sql);
 }
 
-//void User::techniczna() {
-//    const char* sql = "SELECT id, username FROM Users;";
-//    sqlite3_stmt* stmt;
-//
-//    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
-//    //rc = sqlite3_step(stmt);
-//
-//    if (rc == SQLITE_OK) {
-//        while (sqlite3_step(stmt) == SQLITE_ROW)
-//            cout << "ID: " << sqlite3_column_int(stmt, 0) << ", username:  " << sqlite3_column_text(stmt, 1) << endl;
-//    }
-//    else {
-//        cerr << "Nie udało sie pobrac listy. " << sqlite3_errmsg(dbManager.getDB()) << endl;
-//    }
-//
-//    sqlite3_finalize(stmt);
-//}
+void User::techniczna() {
+    const char* sql = "SELECT id, username FROM Users;";
+    sqlite3_stmt* stmt;
+
+    int rc = sqlite3_prepare_v2(dbManager.getDB(), sql, -1, &stmt, 0);
+    //rc = sqlite3_step(stmt);
+
+    if (rc == SQLITE_OK) {
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+            cout << "ID: " << sqlite3_column_int(stmt, 0) << ", username:  " << sqlite3_column_text(stmt, 1) << endl;
+    }
+    else {
+        cerr << "Nie udało sie pobrac listy. " << sqlite3_errmsg(dbManager.getDB()) << endl;
+    }
+
+    sqlite3_finalize(stmt);
+}
 
 void User::createUser(int& loggedInUserId) {
     string username, password, pesel, email;
@@ -80,6 +81,7 @@ void User::createUser(int& loggedInUserId) {
         return;
     }
 
+    // Bindowanie parametrów do zapytania
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, pesel.c_str(), -1, SQLITE_STATIC);
